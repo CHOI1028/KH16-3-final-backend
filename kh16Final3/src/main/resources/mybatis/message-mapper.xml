@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kh.final3.dao.MessageDao">
+
+	<!-- 1. 시퀀스 번호 생성 -->
+	<select id="sequence" resultType="int">
+		select messages_seq.nextval from dual
+	</select>
+
+	<!-- 2. 쪽지 등록 -->
+	<insert id="insert" parameterType="MessageDto">
+		insert into messages (
+			message_no, message_sender, message_receiver, message_content
+		)
+		values (
+			#{messageNo}, #{messageSender}, #{messageReceiver}, #{messageContent}
+		)
+	</insert>
+	
+	<!-- 3. 발신함 목록 조회 (내가 보낸 쪽지) -->
+	<!-- <include>를 제거하고 컬럼을 직접 나열하도록 수정 -->
+	<select id="selectSentList" parameterType="int" resultType="MessageDto">
+		select 
+			message_no, 
+			message_sender, 
+			message_receiver, 
+			message_content,
+			message_sent_time as messageSentTime, 
+			message_read_time as messageReadTime, 
+			message_is_read as messageIsRead,
+			message_sender_deleted as messageSenderDeleted, 
+			message_receiver_deleted as messageReceiverDeleted
+		from messages 
+		where message_sender = #{memberNo} 
+		and message_sender_deleted = 'N'
+		order by message_no desc
+	</select>
+	
+	<!-- 4. 수신함 목록 조회 (내가 받은 쪽지) -->
+	<!-- <include>를 제거하고 컬럼을 직접 나열하도록 수정 -->
+	<select id="selectReceivedList" parameterType="int" resultType="MessageDto">
+		select 
+			message_no, 
+			message_sender, 
+			message_receiver, 
+			message_content,
+			message_sent_time as messageSentTime, 
+			message_read_time as messageReadTime, 
+			message_is_read as messageIsRead,
+			message_sender_deleted as messageSenderDeleted, 
+			message_receiver_deleted as messageReceiverDeleted
+		from messages
+		where message_receiver = #{memberNo} 
+		and message_receiver_deleted = 'N'
+		order by message_no desc
+	</select>
+	
+	<!-- 5. 쪽지 상세 조회 -->
+	<!-- <include>를 제거하고 컬럼을 직접 나열하도록 수정 -->
+	<select id="selectOne" parameterType="int" resultType="MessageDto">
+		select 
+			message_no, 
+			message_sender, 
+			message_receiver, 
+			message_content,
+			message_sent_time as messageSentTime, 
+			message_read_time as messageReadTime, 
+			message_is_read as messageIsRead,
+			message_sender_deleted as messageSenderDeleted, 
+			message_receiver_deleted as messageReceiverDeleted
+		from messages
+		where message_no = #{messageNo}
+	</select>
+	
+	<!-- 6. 쪽지 읽음 처리 (수신 시각 및 상태 업데이트) -->
+	<update id="updateReadTime" parameterType="int">
+		update messages set
+			message_is_read = 'Y',
+			message_read_time = systimestamp
+		where message_no = #{messageNo}
+	</update>
+	
+	<!-- 7. 발신자 삭제 처리 -->
+	<update id="updateSenderDelete" parameterType="int">
+		update messages set
+			message_sender_deleted = 'Y'
+		where message_no = #{messageNo}
+	</update>
+	
+	<!-- 8. 수신자 삭제 처리 -->
+	<update id="updateReceiverDelete" parameterType="int">
+		update messages set
+			message_receiver_deleted = 'Y'
+		where message_no = #{messageNo}
+	</update>
+	
+</mapper>
