@@ -37,11 +37,12 @@ public class CommentRestController {
 			) {
         
 		long memberNo = tokenVO.getMemberNo();
+		String loginLevel = tokenVO.getLoginLevel();
         
 		if (memberNo == 0) { 
 	        throw new UnauthorizationException("로그인 후 댓글 작성이 가능합니다.");
 		}
-		return commentService.insert(commentDto, memberNo);
+		return commentService.insert(commentDto, memberNo, loginLevel);
 	}	
 	
 	/**

@@ -76,7 +76,34 @@ public class MessageService {
 	public List<MessageDto> getReceivedListByTypes(Map<String, Object> paramMap) {
 		return messageDao.selectReceivedListByTypes(paramMap);
 	}
-	
+
+	public void sendNotification(long receiverNo, String content, String url) {
+		
+		
+		long systemSenderNo = 0;
+		
+		// 1. MessageDto 생성
+        MessageDto messageDto = MessageDto.builder()
+                .receiverNo(receiverNo)
+                .senderNo(systemSenderNo)
+                .content(content)
+                // MessageDto에 URL 필드가 있다면 추가 (없다면 필드를 추가해야 함)
+                // .url(url) 
+                .build();
+        
+        // 2. 시퀀스 번호 발급
+        int messageNo = messageDao.sequence();
+        messageDto.setMessageNo(messageNo);
+
+        // 3. 쪽지(알림) 등록
+        boolean insertResult = messageDao.insert(messageDto);
+        
+        // 등록 실패 시 예외 처리 (선택 사항)
+        if (!insertResult) {
+            // throw new RuntimeException("알림 메시지 등록 실패");
+		
+        }
+	}
 }
 	
 	

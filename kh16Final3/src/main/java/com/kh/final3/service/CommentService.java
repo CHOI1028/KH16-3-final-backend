@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kh.final3.dao.BoardDao;
 import com.kh.final3.dao.CommentDao;
 import com.kh.final3.dao.MemberDao;
+import com.kh.final3.dto.BoardDto;
 import com.kh.final3.dto.CommentDto;
 import com.kh.final3.error.TargetNotfoundException;
 import com.kh.final3.error.UnauthorizationException;
@@ -17,36 +19,55 @@ public class CommentService {
 
     @Autowired
     private CommentDao commentDao;
-
     @Autowired
     private MemberDao memberDao; 
-
+    @Autowired
+    private BoardDao boardDao;
+    @Autowired
+    private MessageService messageService;
     /**
      * 1. 댓글 등록
      * - 시퀀스 발급, DTO 설정, DB 삽입을 처리합니다.
      */
     @Transactional
-    public CommentDto insert(CommentDto commentDto, long memberNo) {
+    public CommentDto insert(CommentDto commentDto, long memberNo, String loginLevel) { // 💡 loginLevel 파라미터 추가 필요
 
         // 1. 시퀀스 번호 발급 및 DTO에 설정
         long commentNo = commentDao.sequence();
         commentDto.setCommentNo(commentNo);
         
         // 2. 작성자 ID 설정 (DTO 필드명: writerNo 사용)
-        commentDto.setWriterNo(memberNo); // setCommentWriter -> setWriterNo로 변경
+        commentDto.setWriterNo(memberNo); 
         
-        // 3. 댓글 상태 및 기타 초기값 설정 (DTO 필드명: status 사용)
-        commentDto.setStatus("N"); // setCommentStatus -> setStatus로 변경. DB CHECK에 따라 'N'으로 설정.
+        // 3. 댓글 상태 및 기타 초기값 설정
+        commentDto.setStatus("N"); 
         
         // 4. DAO를 통해 DB에 등록
         boolean success = commentDao.insert(commentDto);
         if (!success) {
-            // 등록 실패 시 예외 처리 필요
+            throw new RuntimeException("댓글 등록에 실패했습니다."); // 적절한 예외 처리로 변경
         }
         
-        // 5. 등록된 댓글 정보 반환 (닉네임 조합)
-        String writerNickname = memberDao.findNicknameByMemberNo(memberNo);
-        commentDto.setWriterNickname(writerNickname);
+        // 5. QNA 답변 알림 로직 추가
+        
+        // 5-1. 부모 게시글 정보 조회 (QNA 여부, 원본 작성자 확인)
+        long parentBoardNo = commentDto.getBoardNo(); // 댓글 DTO에 게시글 번호(부모) 필드가 있다고 가정
+        BoardDto parentBoard = boardDao.selectOne(parentBoardNo);
+        
+        // 5-2. 조건 검사: 'QNA 타입'이며 '관리자'가 작성한 댓글(답변)인 경우
+        if (parentBoard != null && parentBoard.getType().equals("QNA") && loginLevel.equals("admin")) {
+            
+            long qnaWriterNo = parentBoard.getWriterNo(); // QNA 작성자
+            
+            // 5-3. 메시지 발송
+            messageService.sendNotification(
+                qnaWriterNo,
+                "작성하신 문의에 답변이 등록되었습니다.",
+                "/qna/detail/" + parentBoardNo // 알림 클릭 시 이동할 URL
+            );
+        }
+        
+        // 6. 등록된 댓글 정보 반환 (관리자 닉네임 조합 로직은 삭제되었으므로 제외)
 
         return commentDto;
     }

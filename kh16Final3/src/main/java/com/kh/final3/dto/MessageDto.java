@@ -23,6 +23,8 @@ public class MessageDto {
 	private String isRead; // 수신 확인 여부 ('Y', 'N') <-- messageIsRead -> isRead로 변경
 	private String senderDeleted; // 발신자 삭제 여부 ('Y', 'N')
 	private String receiverDeleted; // 수신자 삭제 여부 ('Y', 'N')
+	
+	private String url; // 알림 클릭시 이동경로
 
 	
 	// 1. 판매자 문의 시 사용할 상품 번호 (DB 컬럼 아님, 로직 처리용)
