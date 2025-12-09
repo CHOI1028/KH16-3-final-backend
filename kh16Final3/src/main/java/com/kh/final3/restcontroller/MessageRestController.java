@@ -1,4 +1,4 @@
-package com.kh.final3.restController;
+package com.kh.final3.restcontroller;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kh.final3.dto.MessageDto;
 import com.kh.final3.service.MessageService;
+import com.kh.final3.vo.PageVO;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
@@ -26,7 +27,7 @@ public class MessageRestController {
 	private MessageService messageService;
 	
 	// 쪽지 전송
-	@PostMapping("/") // "/" 아님?
+	@PostMapping("/")
 	public ResponseEntity<String> sendMessage(
 											@RequestBody MessageDto messageDto,
 											@RequestAttribute("memberNo") long memberNo){
@@ -89,6 +90,49 @@ public class MessageRestController {
 		else {
 			return ResponseEntity.internalServerError().body("삭제 실패");
 		}
+	}
+	
+	//페이징 목록 조회 엔드포인트 추가
+	// 1. 수신함 목록 조회
+	@GetMapping("/received/page")
+    public ResponseEntity<PageVO<MessageDto>> getReceivedListByPaging(
+            PageVO<MessageDto> pageVO, // page, size 등 페이징 파라미터 자동 바인딩
+            @RequestAttribute("memberNo") long memberNo
+    ) {
+        // Service의 페이징 메서드 호출
+        PageVO<MessageDto> resultVO = messageService.getReceivedListByPaging(pageVO, memberNo);
+        
+        return ResponseEntity.ok(resultVO);
+    }
+	
+	// 2. 발신함 목록 조회
+	@GetMapping("/sent/page")
+    public ResponseEntity<PageVO<MessageDto>> getSentListByPaging(
+            PageVO<MessageDto> pageVO, // page, size 등 페이징 파라미터 자동 바인딩
+            @RequestAttribute("memberNo") long memberNo
+    ) {
+        // Service의 페이징 메서드 호출
+        PageVO<MessageDto> resultVO = messageService.getSentListByPaging(pageVO, memberNo);
+        
+        return ResponseEntity.ok(resultVO);
+    }
+	
+	// 3. 상세 조회 및 읽음 처리
+	@GetMapping("/{messageNo}")
+	public ResponseEntity<MessageDto> getMessageDetail(
+			@PathVariable Integer messageNo,
+	        @RequestAttribute("memberNo") long currentMemberNo // 쪽지 수신자 확인용 (보안 강화)
+	) {
+	    // 1. 서비스 호출: 상세 조회 및 읽음 처리 트랜잭션 실행
+	    MessageDto detail = messageService.getMessageDetailAndRead(messageNo);
+
+	    // 2. 보안 체크 (선택 사항): 해당 쪽지의 수신자/발신자가 맞는지 확인
+	    if (detail == null || (detail.getReceiverNo() != currentMemberNo && detail.getSenderNo() != currentMemberNo)) {
+	         return ResponseEntity.notFound().build();
+	         // 또는 권한 없음 예외 처리 (throw new UnauthorizationException("권한 없음");)
+	    }
+
+	    return ResponseEntity.ok(detail);
 	}
 	
 }

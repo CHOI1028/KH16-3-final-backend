@@ -12,6 +12,7 @@ import com.kh.final3.dao.MemberDao;
 import com.kh.final3.dto.BoardDto;
 import com.kh.final3.error.TargetNotfoundException;
 import com.kh.final3.error.UnauthorizationException;
+import com.kh.final3.vo.PageVO; // PageVO 임포트 확인
 
 @Service
 public class QnaService { // QnaService 새로 생성
@@ -27,17 +28,15 @@ public class QnaService { // QnaService 새로 생성
 
     /**
      * 1. 문의 등록 (QNA)
-     * - 관리자는 문의 게시판에 글을 등록할 수 없도록 권한 체크
+     * ... (기존 insert 메서드 유지)
      */
 	@Transactional
 	public BoardDto insert(BoardDto boardDto, List<MultipartFile> attachments, String loginLevel, long memberNo) {
 	    
-	    // 1. 문의 등록 권한 체크: 관리자(admin) 차단
 	    if (loginLevel.equals("admin")) {
 	    	throw new UnauthorizationException("관리자는 문의 게시판에 글을 등록할 수 없습니다.");
 	    }
         
-	    // 2. 시퀀스 번호 발급 및 DTO 설정
 	    long boardNo = boardDao.sequence();
         boardDto.setBoardNo(boardNo);
         boardDto.setWriterNo(memberNo); 
@@ -49,19 +48,37 @@ public class QnaService { // QnaService 새로 생성
 	}
     
     /**
-     * 2. 문의 목록 조회 (QNA 전용)
+     * 2. 문의 목록 조회 (QNA 전용) - 페이징 적용 로직 완성
+     * @param pageVO (page, size, column, keyword 정보 포함)
+     * @return BoardDto 리스트와 페이징 정보가 담긴 PageVO
      */
-    public List<BoardDto> selectQnaList() {
-        // DAO의 listByType을 사용하여 QNA 타입만 조회
-	    List<BoardDto> list = boardDao.selectListByType("QNA"); 
+    public PageVO<BoardDto> selectList(PageVO<BoardDto> pageVO) { 
+        
+        // 1. 전체 개수 조회
+        // DAO의 selectCount(String type) 호출 (Mapper에 구현되어 있어야 함)
+        int count = boardDao.selectCount("QNA"); 
+        
+        // 2. PageVO에 총 개수 설정 및 계산
+        pageVO.setDataCount(count); 
+        // PageVO의 Getter(getBegin, getEnd 등)는 dataCount 설정 후 사용 가능
+        
+        // 3. 페이징 정보 기반으로 목록 조회
+        // DAO의 selectListByPaging(String type, int begin, int end) 호출
+        List<BoardDto> list = boardDao.selectListByPaging(
+                                        "QNA", 
+                                        pageVO.getBegin(), 
+                                        pageVO.getEnd());
+        
+        // 4. 작성자 닉네임 조합
+        for (BoardDto boardDto : list) {
+            String writerNickname = memberDao.findNicknameByMemberNo(boardDto.getWriterNo()); 
+            boardDto.setWriterNickname(writerNickname);
+        }
+        
+        // 5. PageVO에 목록 설정 및 반환
+        pageVO.setList(list);
 	    
-	    // 작성자 닉네임 조합 로직은 기존과 동일
-	    for (BoardDto boardDto : list) {
-	        String writerNickname = memberDao.findNicknameByMemberNo(boardDto.getWriterNo()); 
-	        boardDto.setWriterNickname(writerNickname);
-	    }
-	    
-	    return list;
+	    return pageVO; // PageVO 객체 반환
     }
     
     /**
@@ -72,6 +89,7 @@ public class QnaService { // QnaService 새로 생성
 
 	/**
 	 * 4. 문의 삭제
+     * ... (기존 delete 메서드 유지)
 	 */
 	@Transactional
 	public void delete(long boardNo, String loginLevel, long memberNo) {

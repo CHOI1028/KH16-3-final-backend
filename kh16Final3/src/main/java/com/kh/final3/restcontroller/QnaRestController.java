@@ -1,4 +1,4 @@
-package com.kh.final3.restController;
+package com.kh.final3.restcontroller;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,6 +22,7 @@ import com.kh.final3.error.TargetNotfoundException;
 import com.kh.final3.error.UnauthorizationException;
 import com.kh.final3.service.BoardService; // 상세 조회를 위한 BoardService 주입 (공통 로직)
 import com.kh.final3.service.QnaService;
+import com.kh.final3.vo.PageVO;
 import com.kh.final3.vo.TokenVO; 
 
 @CrossOrigin
@@ -60,8 +61,12 @@ public class QnaRestController {
 	 * 2. 문의 목록 조회 (GET /rest/qna)
 	 */
 	@GetMapping
-	public List<BoardDto> list() {
-		return qnaService.selectQnaList(); 
+	public ResponseEntity<PageVO<BoardDto>> list(PageVO<BoardDto> pageVO) {
+        // PageVO는 클라이언트의 URL 쿼리 파라미터 (page, size, column, keyword)에 자동 바인딩됩니다.
+        PageVO<BoardDto> resultVO = qnaService.selectList(pageVO);
+        
+        // 결과 VO와 HTTP 200 OK 응답을 반환
+		return ResponseEntity.ok(resultVO); 
 	}
     
     /**

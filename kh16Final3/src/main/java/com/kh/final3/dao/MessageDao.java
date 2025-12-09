@@ -66,4 +66,25 @@ public class MessageDao {
 	public List<MessageDto> selectReceivedListByTypes(Map<String, Object> paramMap) {
 		return sqlSession.selectList(NAMESPACE + ".selectReceivedListByTypes", paramMap);
 	}
+	
+	// 11. 보낸 쪽지함 개수 조회
+	public long countSent(long memberNo) {
+		return sqlSession.selectOne(NAMESPACE + ".countSent", memberNo);
+	}
+	
+	// 12. 받은 쪽지함 개수 조회
+	public long countReceived(long memberNo) {
+		return sqlSession.selectOne(NAMESPACE + ".countReceived", memberNo);
+	}
+	
+	// 13. 보낸 쪽지함 페이징 목록 조회
+	public List<MessageDto> selectSentListByPaging(Map<String, Object> paramMap) {
+        return sqlSession.selectList(NAMESPACE + ".selectSentListByPaging", paramMap);
+    }
+	
+	// 14. 받은 쪽지함 페이징 목록 조회
+	public List<MessageDto> selectReceivedListByPaging(Map<String, Object> paramMap) {
+        return sqlSession.selectList(NAMESPACE + ".selectReceivedListByPaging", paramMap);
+    }
+	
 }
