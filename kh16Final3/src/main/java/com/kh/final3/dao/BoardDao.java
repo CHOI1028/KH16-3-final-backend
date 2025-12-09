@@ -1,6 +1,8 @@
 package com.kh.final3.dao;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +51,27 @@ public class BoardDao {
 		return sqlSession.delete("board.delete", boardNo) > 0;
 	}
 
+	// 8. 타입별 조회
 	public List<BoardDto> selectListByType(String type) {
 		return sqlSession.selectList("board.listByType", type);
 	}
+	
+	// 9. 전체 개수 조회
+	public int selectCount(String type) {
+		return sqlSession.selectOne("board.selectCount", type);
+	}
+	
+	// 10. 페이징된 목록 조회
+	public List<BoardDto> selectListByPaging(String type, int begin, int end) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("type", type);
+		params.put("begin",  begin);
+		params.put("end",  end);
+		
+		return sqlSession.selectList("board.selectListByPaging", params);
+		
+	}
+	
+	
+	
 }
