@@ -57,15 +57,9 @@ public class MemberDao {
 
 		return sqlSession.selectList("member.complexSearch", vo);
 	}
+	//회원 삭제 및 탈퇴
+	public int deleteMember(Long memberNo) {
+	    return sqlSession.delete("member.deleteMember", memberNo);
+	}
 
-	public boolean updateMemberStatus(Long memberNo, String status) {
-        
-        // MyBatis Mapper에 여러 파라미터를 전달하기 위해 Map 사용
-        Map<String, Object> params = new HashMap<>();
-        params.put("memberNo", memberNo);
-        params.put("status", status);
-        
-        // member.updateMemberStatus 쿼리 호출
-        return sqlSession.update("member.updateMemberStatus", params) > 0;
-    }
 }
