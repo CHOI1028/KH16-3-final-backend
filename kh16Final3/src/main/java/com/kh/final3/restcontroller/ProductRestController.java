@@ -24,87 +24,79 @@ import com.kh.final3.vo.ProductListVO;
 @RestController
 @RequestMapping("/product")
 public class ProductRestController {
-
-    @Autowired
-    private ProductDao productDao;
-
-    @PostMapping("/")
-    public void insert(@RequestBody ProductDto productDto) {
-        Long productNo = (long) productDao.sequence();
-        productDto.setProductNo(productNo);
-        productDao.insert(productDto);
-    }
-
-    @GetMapping("/")
-    public List<ProductDto> list() {
-        return productDao.selectList();
-    }
-
-    @GetMapping("/{productNo}")
-    public ProductDto detail(@PathVariable Long productNo) {
-        ProductDto productDto = productDao.selectOne(productNo);
-        if (productDto == null) throw new TargetNotfoundException("존재하지 않는 상품 입니다");
-        return productDto;
-    }
-
-    @DeleteMapping("/{productNo}")
-    public void delete(@PathVariable Long productNo) {
-        ProductDto productDto = productDao.selectOne(productNo);
-        if (productDto == null) throw new TargetNotfoundException("존재하지 않는 상품입니다");
-        productDao.delete(productNo);
-    }
-
-    @PutMapping("/{productNo}")
-    public void edit(
-            @PathVariable Long productNo,
-            @RequestBody ProductDto productDto) {
-
-        ProductDto originDto = productDao.selectOne(productNo);
-        if (originDto == null) throw new TargetNotfoundException();
-
-        originDto.setName(productDto.getName());
-        originDto.setCategoryCode(productDto.getCategoryCode());
-        originDto.setDescription(productDto.getDescription());
-        originDto.setStartPrice(productDto.getStartPrice());
-        originDto.setFinalPrice(productDto.getFinalPrice());
-        originDto.setInstantPrice(productDto.getInstantPrice());
-        originDto.setStartTime(productDto.getStartTime());
-        originDto.setEndTime(productDto.getEndTime());
-        originDto.setStatus(productDto.getStatus());
-        originDto.setBuyerNo(productDto.getBuyerNo());
-
-        productDao.update(originDto);
-    }
-
-    @PatchMapping("/{productNo}")
-    public void update(
-            @PathVariable Long productNo,
-            @RequestBody ProductDto productDto) {
-
-        ProductDto originDto = productDao.selectOne(productNo);
-        if (originDto == null) throw new TargetNotfoundException();
-
-        productDto.setProductNo(productNo);
-        productDao.updateUnit(productDto);
-    }
-
-    @GetMapping("/page/{page}")
-    public ProductListVO listByPaging(@PathVariable int page) {
-
-        PageVO pageVO = new PageVO();
-        pageVO.setPage(page);
-        pageVO.setDataCount(productDao.count());
-
-        List<ProductDto> list = productDao.selectList(pageVO);
-
-        return ProductListVO.builder()
-                .page(pageVO.getPage())
-                .size(pageVO.getSize())
-                .count(pageVO.getDataCount())
-                .begin(pageVO.getBegin())
-                .end(pageVO.getEnd())
-                .last(pageVO.getPage() >= pageVO.getTotalPage())
-                .list(list)
-                .build();
-    }
+	@Autowired
+	private ProductDao productDao;
+	
+	@PostMapping("/")
+	public void insert(
+			@RequestBody ProductDto productDto
+			) {
+			long productNo=productDao.sequence();
+			productDto.setProductNo(productNo);
+			productDao.insert(productDto);
+	}
+	
+	@GetMapping("/")
+	public List<ProductDto>list(){
+		return productDao.selectList();
+	}
+	@GetMapping("/{productNo}")
+		public ProductDto detail(@PathVariable long productNo) {
+		ProductDto productDto=productDao.selectOne(productNo);
+		if(productDto==null) throw new TargetNotfoundException("존재하지 않는 상품 입니다");
+		return productDto;
+	}
+	
+	@DeleteMapping("/{productNo}")
+	public void delete(@PathVariable long productNo) {
+			ProductDto productDto=productDao.selectOne(productNo);
+			if(productDto==null) throw new TargetNotfoundException("존재하지 않는 상품입니다");
+			productDao.delete(productNo);
+	}
+	@PutMapping("/{productNo}")
+	public  void edit(@PathVariable long productNo,
+										@RequestBody ProductDto productDto) {
+		ProductDto originDto=productDao.selectOne(productNo);
+		if(originDto == null) throw new TargetNotfoundException();
+		originDto.setName(productDto.getName());
+		originDto.setDescription(productDto.getDescription());
+		originDto.setInstantPrice(productDto.getInstantPrice());
+		originDto.setEndTime(productDto.getEndTime());
+		originDto.setStatus(productDto.getStatus());
+		
+		productDao.update(originDto);
+	
+	}
+			
+	@PatchMapping("/{productNo}")
+	public void update(@PathVariable long productNo,
+			@RequestBody ProductDto productDto) {
+		ProductDto originDto=productDao.selectOne(productNo);
+		if(originDto==null) throw new TargetNotfoundException();
+		
+		productDto.setProductNo(productNo);
+		productDao.updateUnit(productDto);
+		
+		}
+	@GetMapping("/page/{page}")
+	public ProductListVO listByPaging(@PathVariable int page) {
+		PageVO pageVO=new PageVO();
+		pageVO.setPage(page);
+		pageVO.setDataCount(productDao.count());
+		List<ProductDto>list=productDao.selectList(pageVO);
+		
+		return ProductListVO.builder()
+				.page(pageVO.getPage())
+				.size(pageVO.getSize())
+				.count(pageVO.getDataCount())
+				.begin(pageVO.getBegin())
+				.end(pageVO.getEnd())
+				.last(pageVO.getPage()>=pageVO.getTotalPage())
+				.list(list)
+				.build();
+		
+		
+		
+	}
+	
 }

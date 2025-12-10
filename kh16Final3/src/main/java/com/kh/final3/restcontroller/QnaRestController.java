@@ -74,7 +74,6 @@ public class QnaRestController {
 	 */
 	@GetMapping("/{boardNo}")
 	public BoardDto detail(@PathVariable long boardNo) {
-        // 상세 조회는 공지사항과 동일한 BoardService의 로직을 사용합니다.
         return boardService.selectOne(boardNo);
 	}
 	
