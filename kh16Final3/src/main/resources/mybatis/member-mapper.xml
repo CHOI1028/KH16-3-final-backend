@@ -12,6 +12,7 @@
         <result column="NICKNAME" property="memberNickname"/>
         <result column="NAME" property="memberName"/>
         <result column="EMAIL" property="memberEmail"/>
+        <result column="ROLE" property="memberRole"/>
         </resultMap>
 
 
@@ -51,6 +52,9 @@
         SELECT * FROM MEMBER WHERE ID = #{memberId}
     </select>
 
+ <select id="detailByMemberId" parameterType="String" resultType="com.kh.final3.dto.MemberDto">
+        select * from member where id = #{memberId}
+    </select>
     <select id="detailByMemberNickname" parameterType="String" resultType="com.kh.final3.dto.MemberDto">
         select * from member where NICKNAME = #{memberNickname}
     </select>
