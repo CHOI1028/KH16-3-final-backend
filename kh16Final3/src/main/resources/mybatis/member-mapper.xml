@@ -56,7 +56,7 @@
     </select>
     
     <select id="findNicknameByMemberNo" parameterType="long" resultType="String">
-        select NICKNAME from member where NO = #{memberNo}
+        select NICKNAME from member where MEMBER_NO = #{memberNo}
     </select>
     
     <select id="selectOneByNameBirthContact" parameterType="map" resultType="com.kh.final3.dto.MemberDto">

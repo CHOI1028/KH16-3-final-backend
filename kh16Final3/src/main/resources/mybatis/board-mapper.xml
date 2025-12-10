@@ -122,10 +122,8 @@
 			SELECT ROWNUM rn, tmp.* FROM (
 				SELECT 
 				    board.*,
-				    member.member_nickname as writerNickname  
-				FROM board
-				LEFT OUTER JOIN member ON board.writer_no = member.member_no
-				WHERE board.type = #{type}
+				    member.NICKNAME as writerNickname  FROM board
+				LEFT OUTER JOIN member ON board.WRITER_NO = member.MEMBER_NO WHERE board.type = #{type}
 				ORDER BY board.board_no DESC
 			) tmp
 	    ) 

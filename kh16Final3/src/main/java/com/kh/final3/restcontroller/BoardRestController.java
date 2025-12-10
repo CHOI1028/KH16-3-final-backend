@@ -27,7 +27,7 @@ public class BoardRestController {
 		boardService.insert(boardDto, attachments, loginLevel, memberNo);
 	}
 	
-	@GetMapping("/")
+	@GetMapping("/list")
 	public List<BoardDto> list() {
 		return boardService.selectNoticeList(); 
 	}
