@@ -1,5 +1,6 @@
 package com.kh.final3.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.kh.final3.dao.MessageDao;
 import com.kh.final3.dto.MessageDto;
+import com.kh.final3.vo.PageVO;
 
 @Service
 public class MessageService {
@@ -104,6 +106,50 @@ public class MessageService {
 		
         }
 	}
+	
+	// 발신함 목록 조회
+	public PageVO<MessageDto> getSentListByPaging(PageVO<MessageDto> pageVO, long memberNo) {
+        
+        // 1. 전체 개수 조회 및 PageVO에 설정
+        long count = messageDao.countSent(memberNo);
+        pageVO.setDataCount((int)count); 
+
+        // 2. DAO에 전달할 Map 생성 (memberNo, begin, end)
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("memberNo", memberNo);
+        paramMap.put("begin", pageVO.getBegin());
+        paramMap.put("end", pageVO.getEnd());
+
+        // 3. 페이징 정보 기반으로 목록 조회
+        List<MessageDto> list = messageDao.selectSentListByPaging(paramMap);
+        
+        // 4. PageVO에 목록 설정
+        pageVO.setList(list);
+        
+        return pageVO;
+    }
+	
+	// 수신함 목록 조회
+	public PageVO<MessageDto> getReceivedListByPaging(PageVO<MessageDto> pageVO, long memberNo) {
+        
+        // 1. 전체 개수 조회 및 PageVO에 설정
+        long count = messageDao.countReceived(memberNo);
+        pageVO.setDataCount((int)count); 
+
+        // 2. DAO에 전달할 Map 생성 (memberNo, begin, end)
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("memberNo", memberNo);
+        paramMap.put("begin", pageVO.getBegin());
+        paramMap.put("end", pageVO.getEnd());
+
+        // 3. 페이징 정보 기반으로 목록 조회
+        List<MessageDto> list = messageDao.selectReceivedListByPaging(paramMap);
+        
+        // 4. PageVO에 목록 설정
+        pageVO.setList(list);
+        
+        return pageVO;
+    }
 }
 	
 	
