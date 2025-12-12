@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -83,6 +84,12 @@ public class MemberDao {
     // 회원정보 수정
     public int updateMember(MemberDto member) {
         return sqlSession.update("member.updateMember", member);
+    }
+    public int updatePassword(@Param("memberNo") Long memberNo, @Param("memberPw") String memberPw) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("memberNo", memberNo);
+        params.put("memberPw", memberPw);
+        return sqlSession.update("member.updatePassword", params);
     }
 
 }

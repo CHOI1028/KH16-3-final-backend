@@ -18,6 +18,7 @@ import com.kh.final3.error.UnauthorizationException;
 import com.kh.final3.service.MemberService;
 import com.kh.final3.service.TokenService;
 import com.kh.final3.vo.TokenVO;
+import com.kh.final3.vo.member.MemberChangePwVO;
 import com.kh.final3.vo.member.MemberComplexSearchVO;
 import com.kh.final3.vo.member.MemberLoginResponseVO;
 import com.kh.final3.vo.member.MemberRefreshVO;
@@ -160,6 +161,7 @@ public class MemberRestController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 삭제 실패");
 		}
 	}
+	//회원 수정
 	@PutMapping("/{memberNo}")
 	public ResponseEntity<String> updateMember(
 	        @PathVariable Long memberNo,
@@ -208,5 +210,57 @@ public class MemberRestController {
 	        throw new UnauthorizationException("유효하지 않거나 만료된 토큰입니다."); 
 	    }
 	}
+	
+	// 비밀번호 변경
+	@PutMapping("/changePassword/{memberNo}")
+	public ResponseEntity<String> changePassword(
+	        @PathVariable Long memberNo,
+	        @RequestHeader("Authorization") String bearerToken,
+	        @RequestBody MemberChangePwVO changePwVO) {
+
+	    // 1. 토큰에서 로그인된 사용자 정보 추출
+	    TokenVO tokenVO = tokenService.parse(bearerToken);
+
+	    // 2. 본인 계정인지 확인
+	    if (!tokenVO.getMemberNo().equals(memberNo)) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+	                .body("본인 계정만 비밀번호를 변경할 수 있습니다.");
+	    }
+
+	    // 3. 기존 비밀번호 확인 (현재 비번으로 체크)
+	    MemberRequestVO checkVO = MemberRequestVO.builder()
+	            .memberNo(memberNo)
+	            .memberPw(changePwVO.getCurrentPw()) //
+	            .build();
+
+	    boolean passwordOk = memberService.checkPassword(checkVO);
+	    if (!passwordOk) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+	                .body("현재 비밀번호가 올바르지 않습니다.");
+	    }
+	    // 4. 새 비밀번호가 현재 비밀번호와 같은지 검사
+	    if (changePwVO.getCurrentPw().equals(changePwVO.getNewPw())) {
+	        return ResponseEntity
+	                .status(HttpStatus.BAD_REQUEST)
+	                .body("새 비밀번호는 현재 비밀번호와 다르게 설정해야 합니다.");
+	    }
+	    
+
+	    // 5. 새 비밀번호 암호화
+	    String encryptedPassword = passwordEncoder.encode(changePwVO.getNewPw());
+
+	    // 6. 비밀번호 업데이트
+	    boolean result = memberService.updatePassword(memberNo, encryptedPassword);
+
+	    if (result) {
+	        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+	    } else {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("비밀번호 변경 실패");
+	    }
+	}
+
+
+
 
 }

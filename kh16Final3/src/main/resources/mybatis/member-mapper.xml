@@ -122,5 +122,12 @@
     from member
     where member_no = #{memberNo}
 </select>
+<!--비밀번호 변경-->
+<update id="updatePassword" parameterType="map">
+    update member
+    set pw = #{memberPw}
+    where member_no = #{memberNo}
+</update>
+
 
 </mapper>

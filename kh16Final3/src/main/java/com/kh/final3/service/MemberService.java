@@ -92,7 +92,22 @@ public class MemberService {
         // 3. DB 업데이트
         return memberDao.updateMember(member) > 0;
     }
-
-
+    @Transactional
+    public boolean changePassword(Long memberNo, String currentPassword, String newPassword) {
+        // 1. 현재 비밀번호 확인
+        boolean isCurrentPasswordValid = checkPassword(new MemberRequestVO(memberNo, currentPassword));
+        if (!isCurrentPasswordValid) {
+            return false; // 현재 비밀번호를 잘못입력
+        }
+        // 2. 새 비밀번호 암호화
+        String encodedNewPassword = passwordEncoder.encode(newPassword);
+        // 3. DB에 새 비밀번호 저장
+        return memberDao.updatePassword(memberNo, encodedNewPassword) > 0;
+    }
+    @Transactional
+    public boolean updatePassword(Long memberNo, String newPassword) {
+        // 비밀번호 업데이트
+        return memberDao.updatePassword(memberNo, newPassword) > 0;
+    }
     
 }
