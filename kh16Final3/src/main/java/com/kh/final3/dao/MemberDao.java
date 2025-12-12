@@ -45,7 +45,18 @@ public class MemberDao {
 	public String findNicknameByMemberNo(long memberNo) {
 	    return sqlSession.selectOne("member.findNicknameByMemberNo", memberNo);
 	}
-	
+	//아이디
+	public MemberDto selectOneByEmail(String email) {
+	    return sqlSession.selectOne("member.selectOneByEmail", email);
+	}
+	//비밀번호 찾기
+	public MemberDto selectOneByIdAndEmail(String memberId, String email) {
+	    Map<String, Object> param = new HashMap<>();
+	    param.put("memberId", memberId);
+	    param.put("email", email);
+	    return sqlSession.selectOne("member.selectOneByIdAndEmail", param);
+	}
+
 	//중복 가입 제거
 	public MemberDto selectOneByNameBirthContact(String name, LocalDate birth, String contact) {
 	    Map<String, Object> param = new HashMap<>();

@@ -22,31 +22,31 @@
 
 
     <insert id="insert" parameterType="com.kh.final3.dto.MemberDto">
-        insert into member (
-            member_no,
-            id,
-            pw,
-            nickname,
-            name,
-            email,
-            birth,
-            contact,
-            post,
-            address1,
-            address2
-        ) values (
-            member_seq.nextval,
-            #{memberId},
-            #{memberPw},
-            #{memberNickname},
-            #{memberName},
-            #{memberEmail},
-            #{memberBirth},
-            #{memberContact},
-            #{memberPost},
-            #{memberAddress1},
-            #{memberAddress2}
-        )
+		insert into member (
+		member_no,
+		id,
+		pw,
+		nickname,
+		name,
+		email,
+		birth,
+		contact,
+		post,
+		address1,
+		address2
+		) values (
+		member_seq.nextval,
+		#{memberId},
+		#{memberPw},
+		#{memberNickname},
+		#{memberName},
+		#{memberEmail},
+		#{memberBirth},
+		#{memberContact},
+		#{memberPost},
+		#{memberAddress1},
+		#{memberAddress2}
+		)
         
     </insert>
     <select id="detail" parameterType="String" resultMap="memberResultMap">
@@ -68,7 +68,7 @@
         select * from member
         where name = #{name} and birth = #{birth} and contact = #{contact}
     </select>
-    
+    <!--회원 찾기-->
     <select id="search" resultType="MemberDto">
         select * from member
         where 
@@ -77,7 +77,7 @@
             role != 'admin'
         order by ${column} asc , id asc
     </select>
-    
+    <!--복합 검색-->
     <select id="complexSearch" resultType="MemberDto">
         select *
         from member
@@ -91,8 +91,6 @@
         set role = #{status}
         where member_no = #{memberNo}
     </update>
-
-
    <!-- 회원 삭제 -->
 <delete id="deleteMember" parameterType="long">
     delete from member
@@ -115,11 +113,9 @@
         contact = #{memberContact}
     where member_no = #{memberNo}
 </update>
-
 <!-- 회원번호로 회원 조회-->
 <select id="selectOneByMemberNo" parameterType="long" resultMap="memberResultMap">
-    select *
-    from member
+    select * from member
     where member_no = #{memberNo}
 </select>
 <!--비밀번호 변경-->
@@ -128,6 +124,14 @@
     set pw = #{memberPw}
     where member_no = #{memberNo}
 </update>
+<!--이메일로 아이디 찾기-->
+<select id="selectOneByEmail" parameterType="string" resultMap="memberResultMap">
+select * from member where email = #{email}
+</select>
+<!--이메일과 아이디로 비밀번호 찾기-->
+<select id="selectOneByIdAndEmail" parameterType="map" resultMap="memberResultMap">
+select * from member where id = #{memberId} and email = #{email}
+</select>
 
 
 </mapper>
