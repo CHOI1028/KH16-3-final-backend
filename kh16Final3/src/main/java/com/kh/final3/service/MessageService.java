@@ -30,10 +30,15 @@ public class MessageService {
 	 */
 	@Transactional
 	public boolean sendMessage(MessageDto messageDto) {
-		int messageNo = messageDao.sequence(); // 시퀀스 번호 발급
-		messageDto.setMessageNo(messageNo);
-		
-		return messageDao.insert(messageDto);
+
+		// 1. 시퀀스 번호 발급
+        long messageNo = messageDao.sequence();
+        messageDto.setMessageNo(messageNo);
+
+		// 2. 쪽지 등록 (DAO의 insert 호출)
+		boolean insertResult = messageDao.insert(messageDto);
+
+		return insertResult;
 	}
 	
 	/**
@@ -45,11 +50,12 @@ public class MessageService {
 	        .senderNo(senderNo)
 	        .receiverNo(receiverNo)
 	        .content(content)
-	        .type("INQUIRY")		 
-	        .productNo((int)productNo)
+	        .type("INQUIRY")         
+	        .productNo(productNo)
 	        .build();
 
-	    int messageNo = messageDao.sequence(); // 시퀀스 번호 발급
+	    // 2. 시퀀스 번호 발급
+	    long messageNo = messageDao.sequence();
 	    messageDto.setMessageNo(messageNo);
 
 	    boolean insertResult = messageDao.insert(messageDto);
@@ -74,7 +80,8 @@ public class MessageService {
 				.url(url)
 				.build();
 
-		int messageNo = messageDao.sequence(); // 시퀀스 번호 발급
+		// 2. 시퀀스 번호 발급
+		long messageNo = messageDao.sequence();
 		messageDto.setMessageNo(messageNo);
 
 		boolean insertResult = messageDao.insert(messageDto);
@@ -109,6 +116,35 @@ public class MessageService {
 	 */
 	public int countUnreadAlerts(long memberNo) {
 		return messageDao.countUnreadAlerts(memberNo);
+	}
+
+	/**
+	 * 2-3. 수신함 목록 조회 (일반)
+	 */
+	public List<MessageDto> getReceivedList(long memberNo) {
+		return messageDao.selectReceivedList(memberNo);
+	}
+
+	/**
+	 * 2-4. 발신함 목록 조회 (일반)
+	 */
+	public List<MessageDto> getSentList(long memberNo) {
+		return messageDao.selectSentList(memberNo);
+	}
+
+	/**
+	 * 2-5. 타입별 수신함 목록 조회 (필터링)
+	 */
+	public List<MessageDto> getReceivedListByTypes(Map<String, Object> paramMap) {
+		return messageDao.selectReceivedListByTypes(paramMap);
+	}
+
+	/**
+	 * 2-6. 전체 미확인 쪽지 개수 조회
+	 * (FaBell 아이콘에 표시될, 모든 타입의 미확인 메시지 개수를 계산)
+	 */
+	public int countUnreadAll(long memberNo) {
+	    return messageDao.countUnreadAll(memberNo);
 	}
     
     /**
