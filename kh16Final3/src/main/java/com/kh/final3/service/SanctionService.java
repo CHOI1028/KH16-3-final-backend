@@ -64,7 +64,7 @@ public class SanctionService {
         }
 
         // 3. 💡 회원 테이블의 ROLE 컬럼을 'SUSPENDED'로 업데이트
-        memberDao.updateMemberStatus(memberNo, "SUSPENDED");
+       // memberDao.updateMemberStatus(memberNo, "SUSPENDED");
         
         // 4. MessageService를 이용해 제재 알림 전송
         String endDateString = (endTime != null) ? endTime.toString() : "영구 정지";
@@ -101,7 +101,7 @@ public class SanctionService {
         }
         
         // 3.  회원 상태를 'DEFAULT'로 업데이트 (ROLE 변경)
-        memberDao.updateMemberStatus(detail.getMemberNo(), "DEFAULT");
+        //memberDao.updateMemberStatus(detail.getMemberNo(), "DEFAULT");
         
         return true;
     }

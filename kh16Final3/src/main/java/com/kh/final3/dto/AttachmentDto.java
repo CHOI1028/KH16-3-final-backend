@@ -1,5 +1,4 @@
 package com.kh.final3.dto;
-
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
@@ -12,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AttachmentDto {
-
     private Long attachmentNo;
     private String mediaType;
     private String path;
@@ -20,7 +18,6 @@ public class AttachmentDto {
     private Integer parentPkNo;
     private String originalName;
     private String storedName;
-    private Integer size;
+    private Integer fileSize;      
     private LocalDateTime createdTime;
-
 }
