@@ -30,32 +30,24 @@ public class CommentService {
      * - 시퀀스 발급, DTO 설정, DB 삽입을 처리합니다.
      */
     @Transactional
-    public CommentDto insert(CommentDto commentDto, long memberNo, String loginLevel) { // 💡 loginLevel 파라미터 추가 필요
+    public CommentDto insert(CommentDto commentDto, long memberNo, String loginLevel) { 
 
-        // 1. 시퀀스 번호 발급 및 DTO에 설정
         long commentNo = commentDao.sequence();
         commentDto.setCommentNo(commentNo);
-        
-        // 2. 작성자 ID 설정 (DTO 필드명: writerNo 사용)
         commentDto.setWriterNo(memberNo); 
-        
-        // 3. 댓글 상태 및 기타 초기값 설정
         commentDto.setStatus("N"); 
         
-        // 4. DAO를 통해 DB에 등록
         boolean success = commentDao.insert(commentDto);
         if (!success) {
-            throw new RuntimeException("댓글 등록에 실패했습니다."); // 적절한 예외 처리로 변경
+            throw new TargetNotfoundException("댓글 등록에 실패했습니다."); 
         }
         
-        // 5. QNA 답변 알림 로직 추가
-        
-        // 5-1. 부모 게시글 정보 조회 (QNA 여부, 원본 작성자 확인)
-        long parentBoardNo = commentDto.getBoardNo(); // 댓글 DTO에 게시글 번호(부모) 필드가 있다고 가정
+        // QNA 답변 알림 로직
+        long parentBoardNo = commentDto.getBoardNo(); // QNA 글 번호
         BoardDto parentBoard = boardDao.selectOne(parentBoardNo);
         
-        // 5-2. 조건 검사: 'QNA 타입'이며 '관리자'가 작성한 댓글(답변)인 경우
-        if (parentBoard != null && parentBoard.getType().equals("QNA") && loginLevel.equals("admin")) {
+        // 조건 검사: 'QNA 타입'이며 '관리자'가 작성한 댓글(답변)인 경우
+        if (parentBoard != null && parentBoard.getType().equals("QNA") && loginLevel.equals("ADMIN")) {
             
             long qnaWriterNo = parentBoard.getWriterNo(); // QNA 작성자
             
@@ -67,8 +59,6 @@ public class CommentService {
             );
         }
         
-        // 6. 등록된 댓글 정보 반환 (관리자 닉네임 조합 로직은 삭제되었으므로 제외)
-
         return commentDto;
     }
 
@@ -105,7 +95,7 @@ public class CommentService {
         // 2. 권한 체크 (본인 또는 관리자만 수정 가능)
         // DTO 필드명: writerNo 사용
         // a. 관리자 권한
-        if (loginLevel.equals("admin")) {
+        if (loginLevel.equals("ADMIN")) {
             // 통과
         }
         // b. 작성자 본인 확인

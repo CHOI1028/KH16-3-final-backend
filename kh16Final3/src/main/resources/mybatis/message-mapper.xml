@@ -10,11 +10,11 @@
 	</select>
 
 	<insert id="insert" parameterType="MessageDto">
-		insert into messages (
-			message_no, sender_no, receiver_no, content, type
+		insert into message (
+			message_no, sender_no, receiver_no, content, type, url, product_no
 		)
 		values (
-			#{messageNo}, #{senderNo}, #{receiverNo}, #{content}, #{type}
+			#{messageNo}, #{senderNo}, #{receiverNo}, #{content}, #{type}, #{url}, #{productNo}
 		)
 	</insert>
 	
@@ -29,8 +29,10 @@
 			read_time as readTime,           
 			is_read as isRead,               
 			sender_deleted as senderDeleted, 
-			receiver_deleted as receiverDeleted
-		from messages 
+			receiver_deleted as receiverDeleted,
+            url as url, 
+            product_no as productNo
+        from message 
 		where sender_no = #{memberNo} 
 		and sender_deleted = 'N'
 		order by message_no desc
@@ -47,8 +49,10 @@
 			read_time as readTime, 
 			is_read as isRead,
 			sender_deleted as senderDeleted, 
-			receiver_deleted as receiverDeleted
-		from messages
+			receiver_deleted as receiverDeleted,
+            url as url, 
+            product_no as productNo
+        from message
 		where receiver_no = #{memberNo} 
 		and receiver_deleted = 'N'
 		order by message_no desc
@@ -65,38 +69,48 @@
 			read_time as readTime, 
 			is_read as isRead,
 			sender_deleted as senderDeleted, 
-			receiver_deleted as receiverDeleted
-		from messages
+			receiver_deleted as receiverDeleted,
+            url as url, 
+            product_no as productNo
+        from message
 		where message_no = #{messageNo}
 	</select>
 	
 	<update id="updateReadTime" parameterType="int">
-		update messages set
+		update message set
 			is_read = 'Y',
 			read_time = systimestamp
 		where message_no = #{messageNo}
 	</update>
 	
 	<update id="updateSenderDelete" parameterType="int">
-		update messages set
+		update message set
 			sender_deleted = 'Y'
 		where message_no = #{messageNo}
 	</update>
 	
 	<update id="updateReceiverDelete" parameterType="int">
-		update messages set
+		update message set
 			receiver_deleted = 'Y'
 		where message_no = #{messageNo}
 	</update>
 	
 	<select id="countUnreadAlerts" parameterType="long" resultType="int">
 		select count(*) 
-		from messages
+		from message
 		where receiver_no = #{memberNo}
 		and is_read = 'N'
-		and type = 'SYSTEM_ALERT'
+		and type = 'ALERT' 
 		and receiver_deleted = 'N'
 	</select>
+	
+	<select id="countUnreadAll" parameterType="long" resultType="int">
+    SELECT COUNT(*) 
+    FROM message
+    WHERE receiver_no = #{memberNo}
+      AND is_read = 'N'
+      AND receiver_deleted = 'N'
+</select>
 	
 	<select id="selectReceivedListByTypes" parameterType="map" resultType="MessageDto">
 		select 
@@ -109,8 +123,10 @@
 			read_time as readTime, 
 			is_read as isRead,
 			sender_deleted as senderDeleted, 
-			receiver_deleted as receiverDeleted
-		from messages
+			receiver_deleted as receiverDeleted,
+            url as url, 
+            product_no as productNo
+        from message
 		where receiver_no = #{memberNo}
 		and receiver_deleted = 'N'
 		and type in 
@@ -119,5 +135,79 @@
 		</foreach>
 		order by message_no desc
 	</select>
-
+	
+	<select id="countSent" parameterType="long" resultType="long">
+		select count(*) from message 
+		where sender_no = #{memberNo}
+		and sender_deleted = 'N'
+	</select>
+	
+	<select id="selectSentListByPaging" parameterType="map" resultType="MessageDto">
+		select * from (
+            select rownum rn, tmp.* from (
+                select 
+                    message_no, 
+                    sender_no, 
+                    receiver_no, 
+                    content,
+                    type,
+                    sent_time as sentTime,           
+                    read_time as readTime,           
+                    is_read as isRead,               
+                    sender_deleted as senderDeleted, 
+                    receiver_deleted as receiverDeleted,
+                    url as url, 
+                    product_no as productNo
+                from message 
+                where sender_no = #{memberNo} 
+                and sender_deleted = 'N'
+                order by message_no desc
+            ) tmp
+        )
+        where rn between #{begin} and #{end}
+	</select>
+	
+	<select id="countReceived" parameterType="long" resultType="int">
+		select count(*) 
+		from message
+		where receiver_no = #{memberNo} 
+		and receiver_deleted = 'N'
+	</select>
+    
+    <select id="selectReceivedListByPaging" parameterType="map" resultType="MessageDto">
+        select * from (
+            select rownum rn, tmp.* from (
+                select 
+                    message_no, 
+                    sender_no, 
+                    receiver_no, 
+                    content,
+                    type,
+                    sent_time as sentTime,           
+                    read_time as readTime,           
+                    is_read as isRead,               
+                    sender_deleted as senderDeleted, 
+                    receiver_deleted as receiverDeleted,
+                    url as url, 
+                    product_no as productNo
+                from message 
+                where receiver_no = #{memberNo} 
+                and receiver_deleted = 'N'
+                order by message_no desc
+            ) tmp
+        )
+        where rn between #{begin} and #{end}
+	</select>
+	
+    <select id="selectConversationByProduct" parameterType="map" resultType="MessageDto">
+        select 
+            message_no, sender_no, receiver_no, content, type, sent_time as sentTime, 
+            is_read as isRead, product_no as productNo,
+            (select nickname from member where member_no = sender_no) as sender_nickname
+        from message
+        where product_no = #{productNo}
+          and (sender_no = #{memberNo} or receiver_no = #{memberNo}) 
+          and type = 'INQUIRY' 
+        order by sent_time asc
+    </select>
 </mapper>

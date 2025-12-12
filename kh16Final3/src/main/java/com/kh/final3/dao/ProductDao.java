@@ -12,6 +12,7 @@ import com.kh.final3.domain.enums.ProductStatus;
 import com.kh.final3.dto.ProductDto;
 import com.kh.final3.vo.AuctionEndRequestVO;
 import com.kh.final3.vo.PageVO;
+
 @Repository
 public class ProductDao {
 	
@@ -40,26 +41,6 @@ public class ProductDao {
 		return sqlSession.delete(NAMESPACE + "delete", productNo);
 	}
 	
-	public int update(ProductDto productDto) {
-		return sqlSession.update(NAMESPACE + "update", productDto);
-	}
-	
-	public int updateUnit(ProductDto productDto) {
-		return sqlSession.update(NAMESPACE + "updateUnit", productDto);
-	}
-	
-	public int count() {
-		return sqlSession.selectOne(NAMESPACE + "countByPaging");
-		
-	}
-	public List<ProductDto>selectList(PageVO pageVO){
-		Map<String,Integer>params=new HashMap<>();
-		params.put("begin", pageVO.getBegin());
-		params.put("end", pageVO.getEnd());
-		return sqlSession.selectList(NAMESPACE + "listByPaging", params);
-		
-	}
-	
 	public int updateStatus(long productNo, ProductStatus changeStatus) {
 		Map<String, Object> params = new HashMap<>();
 	    params.put("productNo", productNo);
@@ -82,5 +63,41 @@ public class ProductDao {
 	public long findSellerNoByProductNo(long productNo) {
 		return sqlSession.selectOne(NAMESPACE + "findSellerNoByProductNo");
 	}
-	
+
+    /** 상품 정보 수정 */
+    public boolean update(ProductDto productDto) {
+        return sqlSession.update(NAMESPACE + "update", productDto) > 0;
+    }
+
+    /** 상품 단위 가격 수정 */
+    public boolean updateUnit(ProductDto productDto) {
+        return sqlSession.update(NAMESPACE + "updateUnit", productDto) > 0;
+    }
+
+    /** 페이지네이션을 위한 상품 전체 개수 조회 */
+    public int count() {
+        return sqlSession.selectOne(NAMESPACE + "countByPaging");
+    }
+
+    /** 페이지네이션 목록 조회 */
+    public List<ProductDto> selectList(PageVO pageVO) {
+        Map<String, Integer> params = new HashMap<>();
+        params.put("begin", pageVO.getBegin());
+        params.put("end", pageVO.getEnd());
+        return sqlSession.selectList("product.listByPaging", params);
+    }
+
+    /** 입찰 발생 시: 현재가, 입찰자, 상태 갱신 */
+    public boolean updateOnBid(Long productNo, Long bidMemberNo, Long bidAmount) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("productNo", productNo);
+        param.put("bidMemberNo", bidMemberNo);
+        param.put("bidAmount", bidAmount);
+        return sqlSession.update("product.updateOnBid", param) > 0;
+    }
+
+    /** 경매 종료/낙찰 확정 */
+    public boolean closeAuction(Long productNo) {
+        return sqlSession.update("product.closeAuction", productNo) > 0;
+    }
 }

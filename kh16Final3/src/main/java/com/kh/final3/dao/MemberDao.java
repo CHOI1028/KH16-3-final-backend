@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.kh.final3.dto.MemberDto;
+import com.kh.final3.vo.member.MemberComplexSearchVO;
+
+
 
 @Repository
 public class MemberDao {
@@ -17,19 +20,22 @@ public class MemberDao {
 	@Autowired
     private SqlSession sqlSession;
 	
-	@Autowired
 	private static final String NAMESPACE = "member."; 
 	
 	public void insert(MemberDto memberDto) {
 		sqlSession.insert(NAMESPACE + "insert", memberDto);
 	}
 	
-	public MemberDto selectOneByMemberId(String id) {
-		return sqlSession.selectOne(NAMESPACE + "detailByMemberId", id);			
+	public MemberDto selectOne(String memberNo) {
+		return sqlSession.selectOne(NAMESPACE + "detail", memberNo);
 	}
 	
-	public MemberDto selectOneByMemberNickname(String nickname){
-		return sqlSession.selectOne(NAMESPACE + "detailByMemberNickname", nickname);	
+	public MemberDto selectOneByMemberId(String id) {
+		return sqlSession.selectOne(NAMESPACE + "detailById", id);			
+	}
+	
+	public MemberDto selectOneByNickname(String nickname){
+		return sqlSession.selectOne(NAMESPACE + "detailByNickname", nickname);	
 	}
 	
 	public List<MemberDto> selectList(String column, String keyword) {
@@ -54,17 +60,54 @@ public class MemberDao {
 	
 	// 회원 포인트 차감
 	public int deductMemberPoint(long memberNo, long amount) {
-		return sqlSession.update(NAMESPACE + "deductMemberPoint");
+		Map<String, Object> params = new HashMap<>();
+	    params.put("memberNo", memberNo);
+	    params.put("amount", amount);
+		return sqlSession.update(NAMESPACE + "deductMemberPoint", params);
 	}
 
 	// 회원 포인트 증가
 	public int addMemberPoint(long memberNo, long amount) {
-		return sqlSession.update(NAMESPACE + "addMemberPoint");
+		Map<String, Object> params = new HashMap<>();
+	    params.put("memberNo", memberNo);
+	    params.put("amount", amount);
+		return sqlSession.update(NAMESPACE + "addMemberPoint", params);
 	}
 	
 	// 회원 포인트 조회
 	public long findMemberPoint(long memberNo) {
 		return sqlSession.selectOne(NAMESPACE + "findMemberPoint", memberNo);
 	}
+
+	public List<MemberDto> selectList(MemberComplexSearchVO vo) {
+		return sqlSession.selectList(NAMESPACE + "complexSearch", vo);
+	}
+
+	public int deleteMember(Long memberNo) {
+	    return sqlSession.delete(NAMESPACE + "deleteMember", memberNo);
+	}
 	
+	public boolean updateMemberStatus(long memberNo, String status) {
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("memberNo", memberNo);
+	    params.put("status", status);
+	    
+	    return sqlSession.update(NAMESPACE  + "updateMemberStatus", params) > 0; 
+	}
+	
+    // 비밀번호 확인
+    public String findPasswordByMemberNo(Long memberNo) {
+        return sqlSession.selectOne(NAMESPACE + "findPasswordByMemberNo", memberNo);
+    }
+    
+    // 회원번호로 회원 조회
+    public MemberDto selectOneByMemberNo(Long memberNo) {
+        return sqlSession.selectOne(NAMESPACE + "selectOneByMemberNo", memberNo);
+    }
+
+    // 회원정보 수정
+    public int updateMember(MemberDto memberDto) {
+        return sqlSession.update(NAMESPACE + "updateMember", memberDto);
+    }
+
 }
