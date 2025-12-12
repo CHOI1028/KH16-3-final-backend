@@ -59,13 +59,13 @@ public class MemberService {
     }
     //비밀번호 확인
     public boolean checkPassword(MemberRequestVO requestVO) {
-        if (requestVO.getMemberNo() == null || requestVO.getMemberPw() == null) {
+        if (requestVO.getMemberNo() == null || requestVO.getPw() == null) {
             return false;
         }
         String originPw = memberDao.findPasswordByMemberNo(requestVO.getMemberNo());
         if (originPw == null) return false;
         // BCrypt 매칭
-        return passwordEncoder.matches(requestVO.getMemberPw(), originPw);
+        return passwordEncoder.matches(requestVO.getPw(), originPw);
     }
     // 회원 삭제
     public boolean deleteMember(Long memberNo) {
