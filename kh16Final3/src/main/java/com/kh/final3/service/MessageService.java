@@ -223,6 +223,4 @@ public class MessageService {
 	public boolean deleteMessageBySender(Integer messageNo) {
 		return messageDao.updateSenderDelete(messageNo);
 	}
-
-	
 }
