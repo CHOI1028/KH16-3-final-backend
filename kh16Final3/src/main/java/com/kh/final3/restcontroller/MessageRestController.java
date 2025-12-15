@@ -91,7 +91,6 @@ public class MessageRestController {
 	
 	/**
 	 * 5. 발신함 목록 조회 (페이지네이션 및 필터링 지원)
-	 * (GET /message/sent/page?page=1&size=10&types=...)
 	 */
 	@GetMapping("/sent/page")
     public ResponseEntity<PageVO<MessageDto>> getSentListByPagingAndFilter(
@@ -109,7 +108,7 @@ public class MessageRestController {
 	 * 6. 수신함에서 쪽지 삭제 (POST /message/delete/receiver/{messageNo})
 	 */
 	@PostMapping("delete/receiver/{messageNo}")
-	public ResponseEntity<String> deleteMessageForReceiver(@PathVariable Integer messageNo) {
+	public ResponseEntity<String> deleteMessageForReceiver(@PathVariable long messageNo) {
 		
 		messageService.deleteMessageByReceiver(messageNo);
 		
@@ -121,7 +120,7 @@ public class MessageRestController {
 	 */
 	@GetMapping("/{messageNo}")
 	public ResponseEntity<MessageDto> getMessageDetail(
-			@PathVariable Integer messageNo,
+			@PathVariable long messageNo,
 	    @RequestAttribute("memberNo") long currentMemberNo) {
 
 	    MessageDto detail = messageService.getMessageDetailAndRead(messageNo);

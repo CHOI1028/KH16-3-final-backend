@@ -99,7 +99,7 @@ public class MessageService {
 	 * 2-1. 쪽지 상세 조회 및 읽음 처리 (트랜잭션 포함)
 	 */
 	@Transactional
-	public MessageDto getMessageDetailAndRead(Integer messageNo) {
+	public MessageDto getMessageDetailAndRead(long messageNo) {
 		MessageDto detail = messageDao.selectOne(messageNo);
 
 		// 미확인 상태(N)이고, 수신자에게 해당 메시지가 삭제되지 않았을 경우에만 읽음 처리
@@ -115,37 +115,9 @@ public class MessageService {
 	 * 2-2. 미확인 알림 개수 조회 (헤더 알림 아이콘용)
 	 */
 	public int countUnreadAlerts(long memberNo) {
-		return messageDao.countUnreadAlerts(memberNo);
+		Long countResult = messageDao.countUnreadAlerts(memberNo);
+		return countResult != null ? countResult.intValue() : 0;
 	}
-
-//	/**
-//	 * 2-3. 수신함 목록 조회 (일반)
-//	 */
-//	public List<MessageDto> getReceivedList(long memberNo) {
-//		return messageDao.selectReceivedList(memberNo);
-//	}
-//
-//	/**
-//	 * 2-4. 발신함 목록 조회 (일반)
-//	 */
-//	public List<MessageDto> getSentList(long memberNo) {
-//		return messageDao.selectSentList(memberNo);
-//	}
-//
-//	/**
-//	 * 2-5. 타입별 수신함 목록 조회 (필터링)
-//	 */
-//	public List<MessageDto> getReceivedListByTypes(Map<String, Object> paramMap) {
-//		return messageDao.selectReceivedListByTypes(paramMap);
-//	}
-//
-//	/**
-//	 * 2-6. 전체 미확인 쪽지 개수 조회
-//	 * (FaBell 아이콘에 표시될, 모든 타입의 미확인 메시지 개수를 계산)
-//	 */
-//	public int countUnreadAll(long memberNo) {
-//	    return messageDao.countUnreadAll(memberNo);
-//	}
     
     /**
      * 2-3. 헤더 드롭다운용 미확인 쪽지 목록 조회 (최신 5개 등)
@@ -213,14 +185,14 @@ public class MessageService {
 	/**
 	 * 3-1. 수신자 삭제 처리 (실제 DB 삭제 대신 플래그 업데이트)
 	 */
-	public boolean deleteMessageByReceiver(Integer messageNo) {
+	public boolean deleteMessageByReceiver(long messageNo) {
 		return messageDao.updateReceiverDelete(messageNo);
 	}
 
 	/**
 	 * 3-2. 발신자 삭제 처리 (실제 DB 삭제 대신 플래그 업데이트)
 	 */
-	public boolean deleteMessageBySender(Integer messageNo) {
+	public boolean deleteMessageBySender(long messageNo) {
 		return messageDao.updateSenderDelete(messageNo);
 	}
 }
