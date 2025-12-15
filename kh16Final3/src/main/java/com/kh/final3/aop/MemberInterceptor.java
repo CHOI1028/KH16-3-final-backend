@@ -37,14 +37,13 @@ public class MemberInterceptor implements HandlerInterceptor {
 			
 			//토큰 해석
 			TokenVO tokenVO = tokenService.parse(authorization);
-			//이어지는 컨트롤러에서 사용 가능하도록 넘기겠다
 			//-> 컨트롤러에서는 @RequestAttribute TokenVO tokenVO로 수신 가능
 			request.setAttribute("tokenVO", tokenVO);
 			System.out.println("로그인 상태입니다!");
 			return true;
 		}
 		catch(Exception e) {//Plan B : 비회원, 토큰만료/위변조 상황
-			System.out.println("로그인 상태가 아니네요");
+			System.out.println("로그인 상태가 아닙니다");
 			e.printStackTrace();
 			response.sendError(401);//Unauthorized
 			return false;

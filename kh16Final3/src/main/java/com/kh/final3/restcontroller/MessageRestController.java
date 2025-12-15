@@ -1,6 +1,8 @@
 package com.kh.final3.restcontroller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -44,21 +46,21 @@ public class MessageRestController {
 		return ResponseEntity.ok("쪽지 전송 완료");
 	}
 	
-//	/**
-//	 * 2. 미확인 알림 개수 조회 (GET /message/unread/count)
-//	 */
-//	@GetMapping("/unread/count")
-//	public ResponseEntity<Map<String, Object>> getUnreadAlertCount(@RequestAttribute("memberNo") long memberNo) {
-//		
-//		int count = messageService.countUnreadAlerts(memberNo);
-//		
-//		Map<String, Object> response = new HashMap<>();
-//		response.put("memberNo", memberNo);
-//		response.put("unreadCount", count);
-//     
-//		return ResponseEntity.ok(response);
-//	}
-//	
+	/**
+	 * 2. 미확인 알림 개수 조회 (GET /message/unread/count)
+	 */
+	@GetMapping("/unread/count")
+	public ResponseEntity<Map<String, Object>> getUnreadAlertCount(@RequestAttribute("memberNo") long memberNo) {
+		
+		int count = messageService.countUnreadAlerts(memberNo);
+		
+		Map<String, Object> response = new HashMap<>();
+		response.put("memberNo", memberNo);
+		response.put("unreadCount", count);
+     
+		return ResponseEntity.ok(response);
+	}
+	
 	/**
 	 * 3. 미확인 쪽지/알림 목록 조회 (헤더 드롭다운용) (GET /message/unread/list)
 	 */
@@ -89,7 +91,6 @@ public class MessageRestController {
 	
 	/**
 	 * 5. 발신함 목록 조회 (페이지네이션 및 필터링 지원)
-	 * (GET /message/sent/page?page=1&size=10&types=...)
 	 */
 	@GetMapping("/sent/page")
     public ResponseEntity<PageVO<MessageDto>> getSentListByPagingAndFilter(
@@ -107,7 +108,7 @@ public class MessageRestController {
 	 * 6. 수신함에서 쪽지 삭제 (POST /message/delete/receiver/{messageNo})
 	 */
 	@PostMapping("delete/receiver/{messageNo}")
-	public ResponseEntity<String> deleteMessageForReceiver(@PathVariable Integer messageNo) {
+	public ResponseEntity<String> deleteMessageForReceiver(@PathVariable long messageNo) {
 		
 		messageService.deleteMessageByReceiver(messageNo);
 		
@@ -119,7 +120,7 @@ public class MessageRestController {
 	 */
 	@GetMapping("/{messageNo}")
 	public ResponseEntity<MessageDto> getMessageDetail(
-			@PathVariable Integer messageNo,
+			@PathVariable long messageNo,
 	    @RequestAttribute("memberNo") long currentMemberNo) {
 
 	    MessageDto detail = messageService.getMessageDetailAndRead(messageNo);
