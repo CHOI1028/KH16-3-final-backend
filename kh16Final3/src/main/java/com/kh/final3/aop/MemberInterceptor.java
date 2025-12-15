@@ -24,7 +24,7 @@ public class MemberInterceptor implements HandlerInterceptor {
 		
 		//[1] OPTIONS 요청은 통과시킨다
 		//- 통신이 가능한 대상인지 확인하는 선발대 형식의 통신
-		//- CORS 상황이거나, 일반적인 요청방식(GET/POST/HEAD)이 아니면 발생
+		//- CORS 상황이거나, 일반적인 요청방식(GET/POST/HEAD)이 아니면 발생	
 		if(request.getMethod().equalsIgnoreCase("options")) {
 			return true;
 		}
@@ -33,7 +33,7 @@ public class MemberInterceptor implements HandlerInterceptor {
 		try {//Plan A : 정상적인 로그인 상태
 			String authorization = request.getHeader("Authorization");
 			if(authorization == null)//헤더가 없음 = 비회원
-				throw new UnauthorizationException();//플랜 B로 던져!
+				throw new UnauthorizationException();//플랜 B로 던져!	
 			
 			//토큰 해석
 			TokenVO tokenVO = tokenService.parse(authorization);
